@@ -10,29 +10,68 @@ This project is intended to support structured investment research and portfolio
 
 This software is for informational and research purposes only. It does not provide financial, investment, legal, tax, or professional advice. Users are responsible for their own investment decisions.
 
-## Planned MVP modules
+## Current MVP modules
 
-- Portfolio holdings
+- Dashboard
+- Portfolio holdings view
 - Watchlist
-- Investment thesis tracker
-- Price ingestion
-- News and filing ingestion
-- AI research reports
-- Risk alerts
-- Decision journal
-- Portfolio snapshots
+- Investment research view
+- AI reports view
+- Settings page
+- Decision journal view
+- Supabase schema migration
+- Supabase client/server helpers
 
-## Proposed stack
+## Stack
 
+- Next.js
 - React
-- Vite
 - TypeScript
 - Tailwind CSS
 - Supabase
 - Vercel
+- Recharts
 - Market data APIs
 - AI reasoning layer
 
-## Status
+## Local setup
 
-Pre-MVP foundation.
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+## Environment variables
+
+Copy `.env.example` to `.env.local` and fill in the values.
+
+Required for Supabase-backed API routes:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+## Database
+
+The initial schema is in:
+
+```text
+supabase/migrations/0001_initial_schema.sql
+```
+
+Do not apply this migration to an unrelated production database. Use a dedicated Supabase project for this investment bot.
