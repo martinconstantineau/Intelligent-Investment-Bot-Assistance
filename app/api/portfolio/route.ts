@@ -1,15 +1,8 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { getDashboardHoldings } from "@/lib/database-data";
 
 export async function GET() {
-  const { data, error } = await supabaseAdmin
-    .from("holdings")
-    .select("*")
-    .order("symbol", { ascending: true });
+  const holdings = await getDashboardHoldings();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ holdings: data });
+  return NextResponse.json({ holdings });
 }
