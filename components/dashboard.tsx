@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AllocationChart } from "@/components/allocation-chart";
+import { DecisionJournal } from "@/components/decision-journal";
 import { HoldingsTable } from "@/components/holdings-table";
 import { ReportList } from "@/components/report-list";
 import { StatCard } from "@/components/stat-card";
@@ -15,6 +16,14 @@ import {
   type HoldingCreateInput,
   type HoldingUpdateInput
 } from "@/lib/firebase/client-holdings";
+import {
+  createDecisionJournalEntry,
+  listenToDecisionJournalEntries,
+  updateDecisionJournalEntry,
+  type DecisionJournalCreateInput,
+  type DecisionJournalEntry,
+  type DecisionJournalUpdateInput
+} from "@/lib/firebase/decision-journal";
 import { portfolioDisclaimer, type Holding } from "@/lib/portfolio";
 
 export function Dashboard() {
@@ -22,6 +31,9 @@ export function Dashboard() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [loadingHoldings, setLoadingHoldings] = useState(true);
   const [holdingsError, setHoldingsError] = useState<string | null>(null);
+  const [journalEntries, setJournalEntries] = useState<DecisionJournalEntry[]>([]);
+  const [loadingJournalEntries, setLoadingJournalEntries] = useState(true);
+  const [journalError, setJournalError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -65,6 +77,29 @@ export function Dashboard() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    setLoadingJournalEntries(true);
+    setJournalError(null);
+
+    const unsubscribe = listenToDecisionJournalEntries(
+      user.uid,
+      (nextEntries) => {
+        setJournalEntries(nextEntries);
+        setLoadingJournalEntries(false);
+      },
+      (message) => {
+        setJournalError(message);
+        setLoadingJournalEntries(false);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user]);
+
   if (!user) {
     return null;
   }
@@ -77,6 +112,14 @@ export function Dashboard() {
 
   async function handleUpdateHolding(holdingId: string, updates: HoldingUpdateInput) {
     await updateHolding(user.uid, holdingId, updates);
+  }
+
+  async function handleCreateJournalEntry(input: DecisionJournalCreateInput) {
+    await createDecisionJournalEntry(user.uid, input);
+  }
+
+  async function handleUpdateJournalEntry(entryId: string, updates: DecisionJournalUpdateInput) {
+    await updateDecisionJournalEntry(user.uid, entryId, updates);
   }
 
   return (
@@ -103,7 +146,7 @@ export function Dashboard() {
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Tracked Holdings" value={loadingHoldings ? "…" : String(holdings.length)} detail="User-specific Firestore holdings" />
-          <StatCard label="Data Source" value="Firebase" detail="Auth + Firestore MVP" />
+          <StatCard label="Journal Entries" value={loadingJournalEntries ? "…" : String(journalEntries.length)} detail="Decision history records" />
           <StatCard label="Position Data" value="Manual" detail="No invented quantities or prices" />
           <StatCard label="Automation" value="Off" detail="Scheduled reports planned later" />
         </section>
@@ -112,6 +155,15 @@ export function Dashboard() {
           <AllocationChart />
           <HoldingsTable holdings={holdings} loading={loadingHoldings} error={holdingsError} onCreateHolding={handleCreateHolding} onUpdateHolding={handleUpdateHolding} />
         </section>
+
+        <DecisionJournal
+          holdings={holdings}
+          entries={journalEntries}
+          loading={loadingJournalEntries}
+          error={journalError}
+          onCreateEntry={handleCreateJournalEntry}
+          onUpdateEntry={handleUpdateJournalEntry}
+        />
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ThesisList />
