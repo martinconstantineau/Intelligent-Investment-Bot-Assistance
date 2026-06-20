@@ -7,7 +7,14 @@ import { ReportList } from "@/components/report-list";
 import { StatCard } from "@/components/stat-card";
 import { ThesisList } from "@/components/thesis-list";
 import { useAuth } from "@/components/auth-gate";
-import { initializeCanonicalHoldingsIfEmpty, listenToHoldings } from "@/lib/firebase/client-holdings";
+import {
+  createHolding,
+  initializeCanonicalHoldingsIfEmpty,
+  listenToHoldings,
+  updateHolding,
+  type HoldingCreateInput,
+  type HoldingUpdateInput
+} from "@/lib/firebase/client-holdings";
 import { portfolioDisclaimer, type Holding } from "@/lib/portfolio";
 
 export function Dashboard() {
@@ -60,6 +67,14 @@ export function Dashboard() {
 
   const displayName = user.displayName || user.email || "Signed-in user";
 
+  async function handleCreateHolding(input: HoldingCreateInput) {
+    await createHolding(user.uid, input);
+  }
+
+  async function handleUpdateHolding(holdingId: string, updates: HoldingUpdateInput) {
+    await updateHolding(user.uid, holdingId, updates);
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -91,7 +106,7 @@ export function Dashboard() {
 
         <section className="grid gap-6 xl:grid-cols-[420px_1fr]">
           <AllocationChart />
-          <HoldingsTable holdings={holdings} loading={loadingHoldings} error={holdingsError} />
+          <HoldingsTable holdings={holdings} loading={loadingHoldings} error={holdingsError} onCreateHolding={handleCreateHolding} onUpdateHolding={handleUpdateHolding} />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-2">
