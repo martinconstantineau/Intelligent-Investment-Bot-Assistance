@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AllocationChart } from "@/components/allocation-chart";
 import { DecisionJournal } from "@/components/decision-journal";
 import { HoldingsTable } from "@/components/holdings-table";
+import { PortfolioReviewReport } from "@/components/portfolio-review-report";
 import { PortfolioReviewSummary } from "@/components/portfolio-review-summary";
 import { ReportList } from "@/components/report-list";
 import { ResearchNotes } from "@/components/research-notes";
@@ -265,6 +266,8 @@ export function Dashboard() {
             onUpdateEntry={handleUpdateJournalEntry}
           />
         </section>
+
+        <PortfolioReviewReport holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ThesisList />
