@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AllocationChart } from "@/components/allocation-chart";
+import { DataQualitySummary } from "@/components/data-quality-summary";
 import { DecisionJournal } from "@/components/decision-journal";
 import { HoldingsTable } from "@/components/holdings-table";
 import { PortfolioReviewReport } from "@/components/portfolio-review-report";
@@ -204,7 +205,7 @@ export function Dashboard() {
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6 overflow-hidden sm:overflow-visible">
         <header className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-sm">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-sky-400">Firebase-first investment intelligence</p>
           <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -230,6 +231,8 @@ export function Dashboard() {
         </section>
 
         <PortfolioReviewSummary holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
+
+        <DataQualitySummary holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
 
         <WorkspaceSearch holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
 
