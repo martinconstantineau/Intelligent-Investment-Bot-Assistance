@@ -8,6 +8,7 @@ import { ReportList } from "@/components/report-list";
 import { ResearchNotes } from "@/components/research-notes";
 import { StatCard } from "@/components/stat-card";
 import { ThesisList } from "@/components/thesis-list";
+import { ThesisReviews } from "@/components/thesis-reviews";
 import { useAuth } from "@/components/auth-gate";
 import {
   createHolding,
@@ -33,6 +34,14 @@ import {
   type ResearchNoteCreateInput,
   type ResearchNoteUpdateInput
 } from "@/lib/firebase/research-notes";
+import {
+  createThesisReview,
+  listenToThesisReviews,
+  updateThesisReview,
+  type ThesisReview,
+  type ThesisReviewCreateInput,
+  type ThesisReviewUpdateInput
+} from "@/lib/firebase/thesis-reviews";
 import { portfolioDisclaimer, type Holding } from "@/lib/portfolio";
 
 export function Dashboard() {
@@ -46,6 +55,9 @@ export function Dashboard() {
   const [researchNotes, setResearchNotes] = useState<ResearchNote[]>([]);
   const [loadingResearchNotes, setLoadingResearchNotes] = useState(true);
   const [researchNotesError, setResearchNotesError] = useState<string | null>(null);
+  const [thesisReviews, setThesisReviews] = useState<ThesisReview[]>([]);
+  const [loadingThesisReviews, setLoadingThesisReviews] = useState(true);
+  const [thesisReviewsError, setThesisReviewsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -135,6 +147,29 @@ export function Dashboard() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    setLoadingThesisReviews(true);
+    setThesisReviewsError(null);
+
+    const unsubscribe = listenToThesisReviews(
+      user.uid,
+      (nextReviews) => {
+        setThesisReviews(nextReviews);
+        setLoadingThesisReviews(false);
+      },
+      (message) => {
+        setThesisReviewsError(message);
+        setLoadingThesisReviews(false);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user]);
+
   if (!user) {
     return null;
   }
@@ -165,6 +200,14 @@ export function Dashboard() {
     await updateResearchNote(user.uid, noteId, updates);
   }
 
+  async function handleCreateThesisReview(input: ThesisReviewCreateInput) {
+    await createThesisReview(user.uid, input);
+  }
+
+  async function handleUpdateThesisReview(reviewId: string, updates: ThesisReviewUpdateInput) {
+    await updateThesisReview(user.uid, reviewId, updates);
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -190,14 +233,25 @@ export function Dashboard() {
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Tracked Holdings" value={loadingHoldings ? "…" : String(holdings.length)} detail="User-specific Firestore holdings" />
           <StatCard label="Research Notes" value={loadingResearchNotes ? "…" : String(researchNotes.length)} detail="Evidence and source capture" />
+          <StatCard label="Thesis Reviews" value={loadingThesisReviews ? "…" : String(thesisReviews.length)} detail="Manual review workflow" />
           <StatCard label="Journal Entries" value={loadingJournalEntries ? "…" : String(journalEntries.length)} detail="Decision history records" />
-          <StatCard label="Automation" value="Off" detail="Scheduled reports planned later" />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[420px_1fr]">
           <AllocationChart />
           <HoldingsTable holdings={holdings} loading={loadingHoldings} error={holdingsError} onCreateHolding={handleCreateHolding} onUpdateHolding={handleUpdateHolding} />
         </section>
+
+        <ThesisReviews
+          holdings={holdings}
+          researchNotes={researchNotes}
+          journalEntries={journalEntries}
+          reviews={thesisReviews}
+          loading={loadingThesisReviews}
+          error={thesisReviewsError}
+          onCreateReview={handleCreateThesisReview}
+          onUpdateReview={handleUpdateThesisReview}
+        />
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ResearchNotes
