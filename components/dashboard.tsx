@@ -5,6 +5,7 @@ import { AllocationChart } from "@/components/allocation-chart";
 import { DecisionJournal } from "@/components/decision-journal";
 import { HoldingsTable } from "@/components/holdings-table";
 import { ReportList } from "@/components/report-list";
+import { ResearchNotes } from "@/components/research-notes";
 import { StatCard } from "@/components/stat-card";
 import { ThesisList } from "@/components/thesis-list";
 import { useAuth } from "@/components/auth-gate";
@@ -24,6 +25,14 @@ import {
   type DecisionJournalEntry,
   type DecisionJournalUpdateInput
 } from "@/lib/firebase/decision-journal";
+import {
+  createResearchNote,
+  listenToResearchNotes,
+  updateResearchNote,
+  type ResearchNote,
+  type ResearchNoteCreateInput,
+  type ResearchNoteUpdateInput
+} from "@/lib/firebase/research-notes";
 import { portfolioDisclaimer, type Holding } from "@/lib/portfolio";
 
 export function Dashboard() {
@@ -34,6 +43,9 @@ export function Dashboard() {
   const [journalEntries, setJournalEntries] = useState<DecisionJournalEntry[]>([]);
   const [loadingJournalEntries, setLoadingJournalEntries] = useState(true);
   const [journalError, setJournalError] = useState<string | null>(null);
+  const [researchNotes, setResearchNotes] = useState<ResearchNote[]>([]);
+  const [loadingResearchNotes, setLoadingResearchNotes] = useState(true);
+  const [researchNotesError, setResearchNotesError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -100,6 +112,29 @@ export function Dashboard() {
     };
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    setLoadingResearchNotes(true);
+    setResearchNotesError(null);
+
+    const unsubscribe = listenToResearchNotes(
+      user.uid,
+      (nextNotes) => {
+        setResearchNotes(nextNotes);
+        setLoadingResearchNotes(false);
+      },
+      (message) => {
+        setResearchNotesError(message);
+        setLoadingResearchNotes(false);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user]);
+
   if (!user) {
     return null;
   }
@@ -120,6 +155,14 @@ export function Dashboard() {
 
   async function handleUpdateJournalEntry(entryId: string, updates: DecisionJournalUpdateInput) {
     await updateDecisionJournalEntry(user.uid, entryId, updates);
+  }
+
+  async function handleCreateResearchNote(input: ResearchNoteCreateInput) {
+    await createResearchNote(user.uid, input);
+  }
+
+  async function handleUpdateResearchNote(noteId: string, updates: ResearchNoteUpdateInput) {
+    await updateResearchNote(user.uid, noteId, updates);
   }
 
   return (
@@ -146,8 +189,8 @@ export function Dashboard() {
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Tracked Holdings" value={loadingHoldings ? "…" : String(holdings.length)} detail="User-specific Firestore holdings" />
+          <StatCard label="Research Notes" value={loadingResearchNotes ? "…" : String(researchNotes.length)} detail="Evidence and source capture" />
           <StatCard label="Journal Entries" value={loadingJournalEntries ? "…" : String(journalEntries.length)} detail="Decision history records" />
-          <StatCard label="Position Data" value="Manual" detail="No invented quantities or prices" />
           <StatCard label="Automation" value="Off" detail="Scheduled reports planned later" />
         </section>
 
@@ -156,14 +199,24 @@ export function Dashboard() {
           <HoldingsTable holdings={holdings} loading={loadingHoldings} error={holdingsError} onCreateHolding={handleCreateHolding} onUpdateHolding={handleUpdateHolding} />
         </section>
 
-        <DecisionJournal
-          holdings={holdings}
-          entries={journalEntries}
-          loading={loadingJournalEntries}
-          error={journalError}
-          onCreateEntry={handleCreateJournalEntry}
-          onUpdateEntry={handleUpdateJournalEntry}
-        />
+        <section className="grid gap-6 xl:grid-cols-2">
+          <ResearchNotes
+            holdings={holdings}
+            notes={researchNotes}
+            loading={loadingResearchNotes}
+            error={researchNotesError}
+            onCreateNote={handleCreateResearchNote}
+            onUpdateNote={handleUpdateResearchNote}
+          />
+          <DecisionJournal
+            holdings={holdings}
+            entries={journalEntries}
+            loading={loadingJournalEntries}
+            error={journalError}
+            onCreateEntry={handleCreateJournalEntry}
+            onUpdateEntry={handleUpdateJournalEntry}
+          />
+        </section>
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ThesisList />
