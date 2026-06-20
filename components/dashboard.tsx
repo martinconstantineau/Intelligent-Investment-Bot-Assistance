@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AllocationChart } from "@/components/allocation-chart";
 import { DecisionJournal } from "@/components/decision-journal";
 import { HoldingsTable } from "@/components/holdings-table";
+import { PortfolioReviewSummary } from "@/components/portfolio-review-summary";
 import { ReportList } from "@/components/report-list";
 import { ResearchNotes } from "@/components/research-notes";
 import { StatCard } from "@/components/stat-card";
@@ -69,9 +70,7 @@ export function Dashboard() {
       try {
         setLoadingHoldings(true);
         setHoldingsError(null);
-
         await initializeCanonicalHoldingsIfEmpty(userId);
-
         if (cancelled) return;
 
         unsubscribe = listenToHoldings(
@@ -119,9 +118,7 @@ export function Dashboard() {
       }
     );
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [user]);
 
   useEffect(() => {
@@ -142,9 +139,7 @@ export function Dashboard() {
       }
     );
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [user]);
 
   useEffect(() => {
@@ -165,14 +160,10 @@ export function Dashboard() {
       }
     );
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [user]);
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const displayName = user.displayName || user.email || "Signed-in user";
 
@@ -216,9 +207,7 @@ export function Dashboard() {
           <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">Intelligent Investment Bot Assistance</h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">
-                Minimal Firebase MVP for portfolio monitoring, thesis tracking, research notes, and decision journaling. No brokerage integration and no trading execution.
-              </p>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">Minimal Firebase MVP for portfolio monitoring, thesis tracking, research notes, and decision journaling.</p>
               <p className="mt-3 text-sm text-slate-300">Signed in as {displayName}</p>
             </div>
             <div className="space-y-3 lg:max-w-md">
@@ -236,6 +225,8 @@ export function Dashboard() {
           <StatCard label="Thesis Reviews" value={loadingThesisReviews ? "…" : String(thesisReviews.length)} detail="Manual review workflow" />
           <StatCard label="Journal Entries" value={loadingJournalEntries ? "…" : String(journalEntries.length)} detail="Decision history records" />
         </section>
+
+        <PortfolioReviewSummary holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
 
         <section className="grid gap-6 xl:grid-cols-[420px_1fr]">
           <AllocationChart />
