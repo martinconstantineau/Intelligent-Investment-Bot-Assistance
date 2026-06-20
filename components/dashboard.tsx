@@ -29,17 +29,17 @@ export function Dashboard() {
     let unsubscribe: (() => void) | undefined;
     let cancelled = false;
 
-    async function initializeAndSubscribe() {
+    async function initializeAndSubscribe(userId: string) {
       try {
         setLoadingHoldings(true);
         setHoldingsError(null);
 
-        await initializeCanonicalHoldingsIfEmpty(user.uid);
+        await initializeCanonicalHoldingsIfEmpty(userId);
 
         if (cancelled) return;
 
         unsubscribe = listenToHoldings(
-          user.uid,
+          userId,
           (nextHoldings) => {
             setHoldings(nextHoldings);
             setLoadingHoldings(false);
@@ -57,13 +57,17 @@ export function Dashboard() {
       }
     }
 
-    initializeAndSubscribe();
+    initializeAndSubscribe(user.uid);
 
     return () => {
       cancelled = true;
       unsubscribe?.();
     };
   }, [user]);
+
+  if (!user) {
+    return null;
+  }
 
   const displayName = user.displayName || user.email || "Signed-in user";
 
