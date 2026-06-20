@@ -10,6 +10,7 @@ import { ResearchNotes } from "@/components/research-notes";
 import { StatCard } from "@/components/stat-card";
 import { ThesisList } from "@/components/thesis-list";
 import { ThesisReviews } from "@/components/thesis-reviews";
+import { WorkspaceSearch } from "@/components/workspace-search";
 import { useAuth } from "@/components/auth-gate";
 import {
   createHolding,
@@ -227,6 +228,8 @@ export function Dashboard() {
         </section>
 
         <PortfolioReviewSummary holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
+
+        <WorkspaceSearch holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
 
         <section className="grid gap-6 xl:grid-cols-[420px_1fr]">
           <AllocationChart />
