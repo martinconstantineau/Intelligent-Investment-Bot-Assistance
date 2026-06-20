@@ -1,9 +1,16 @@
-import { collection, doc, getDocs, onSnapshot, orderBy, query, serverTimestamp, writeBatch } from "firebase/firestore";
+import { collection, doc, getDocs, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, writeBatch } from "firebase/firestore";
 import { canonicalHoldings, type Holding } from "@/lib/portfolio";
 import { firestore } from "./client";
 
+export type HoldingCreateInput = Omit<Holding, "id" | "userId" | "createdAt" | "updatedAt">;
+export type HoldingUpdateInput = Partial<Omit<Holding, "id" | "userId" | "createdAt" | "updatedAt">>;
+
 function holdingsCollection(userId: string) {
   return collection(firestore, "users", userId, "holdings");
+}
+
+function holdingDocument(userId: string, holdingId: string) {
+  return doc(firestore, "users", userId, "holdings", holdingId);
 }
 
 export async function initializeCanonicalHoldingsIfEmpty(userId: string) {
@@ -28,6 +35,24 @@ export async function initializeCanonicalHoldingsIfEmpty(userId: string) {
   });
 
   await batch.commit();
+}
+
+export async function createHolding(userId: string, holding: HoldingCreateInput) {
+  const holdingRef = doc(holdingsCollection(userId));
+
+  await setDoc(holdingRef, {
+    ...holding,
+    userId,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+}
+
+export async function updateHolding(userId: string, holdingId: string, updates: HoldingUpdateInput) {
+  await updateDoc(holdingDocument(userId, holdingId), {
+    ...updates,
+    updatedAt: serverTimestamp()
+  });
 }
 
 export function listenToHoldings(userId: string, onChange: (holdings: Holding[]) => void, onError: (message: string) => void) {
