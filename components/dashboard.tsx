@@ -11,6 +11,7 @@ import { ResearchNotes } from "@/components/research-notes";
 import { StatCard } from "@/components/stat-card";
 import { ThesisList } from "@/components/thesis-list";
 import { ThesisReviews } from "@/components/thesis-reviews";
+import { WorkspaceExport } from "@/components/workspace-export";
 import { WorkspaceSearch } from "@/components/workspace-search";
 import { useAuth } from "@/components/auth-gate";
 import {
@@ -268,6 +269,8 @@ export function Dashboard() {
         </section>
 
         <PortfolioReviewReport holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
+
+        <WorkspaceExport holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
 
         <section className="grid gap-6 xl:grid-cols-2">
           <ThesisList />
