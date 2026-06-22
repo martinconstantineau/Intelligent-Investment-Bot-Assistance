@@ -22,7 +22,7 @@ export type ThesisReview = {
 export type ThesisReviewCreateInput = Omit<ThesisReview, "id" | "userId" | "createdAt" | "updatedAt">;
 export type ThesisReviewUpdateInput = Partial<ThesisReviewCreateInput>;
 
-type ThesisReviewRow = {
+export type ThesisReviewRow = {
   id: string;
   user_id: string;
   holding_id: string;
@@ -39,7 +39,7 @@ type ThesisReviewRow = {
   updated_at: string;
 };
 
-function fromRow(row: ThesisReviewRow): ThesisReview {
+export function fromRow(row: ThesisReviewRow): ThesisReview {
   return {
     id: row.id,
     userId: row.user_id,

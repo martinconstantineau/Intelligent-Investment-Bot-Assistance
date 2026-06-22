@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import type { Holding } from "@/lib/portfolio";
-import type { ResearchNote, ResearchNoteCreateInput, ResearchNoteUpdateInput, RiskImpact, SourceType, ThesisImpact } from "@/lib/firebase/research-notes";
+import type { ResearchNote, ResearchNoteCreateInput, ResearchNoteUpdateInput, RiskImpact, SourceType, ThesisImpact } from "@/lib/supabase/research-notes";
+import { ResearchNoteItem } from "@/components/research-note-item";
 
 type ResearchNotesProps = {
   holdings: Holding[];
@@ -58,10 +59,6 @@ function FieldLabel({ label, children }: { label: string; children: React.ReactN
       {children}
     </label>
   );
-}
-
-function formatEnum(value: string | null) {
-  return value ? value.replace(/_/g, " ") : "Not set";
 }
 
 function formFromNote(note: ResearchNote): ResearchNoteFormState {
@@ -130,6 +127,10 @@ function normalizeForm(form: ResearchNoteFormState, holdings: Holding[]): Resear
 }
 
 function ResearchNoteForm({ form, holdings, setForm }: { form: ResearchNoteFormState; holdings: Holding[]; setForm: (next: ResearchNoteFormState) => void }) {
+  /**
+   * Fixes Issue #2 & #6: Inefficient Filtering and O(n) Search
+   * Memoize selected holding lookup to prevent unnecessary searches
+   */
   const selectedHolding = useMemo(() => holdings.find((holding) => holding.id === form.holdingId) ?? null, [holdings, form.holdingId]);
 
   return (
@@ -184,7 +185,7 @@ function ResearchNoteForm({ form, holdings, setForm }: { form: ResearchNoteFormS
       </div>
       <label className="space-y-1 text-xs text-slate-400 md:col-span-2 xl:col-span-3">
         <span>Summary</span>
-        <textarea className={`${inputClassName()} min-h-28 resize-y`} value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} placeholder="Summarize the evidence, key facts, and relevance to the thesis." />
+        <textarea className={`${inputClassName()} min-h-28 resize-y`} value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} placeholder="Summarize the evidence or source." />
       </label>
     </div>
   );
@@ -281,55 +282,23 @@ export function ResearchNotes({ holdings, notes, loading, error, onCreateNote, o
 
       {!loading && !error && notes.length > 0 ? (
         <div className="space-y-3">
-          {notes.map((note) => (
-            <article key={note.id} className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-              {editingId === note.id ? (
-                <>
-                  <ResearchNoteForm form={editForm} holdings={holdings} setForm={setEditForm} />
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button disabled={saving} onClick={() => handleSaveEdit(note.id)} className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-60">
-                      {saving ? "Saving…" : "Save"}
-                    </button>
-                    <button disabled={saving} onClick={() => setEditingId(null)} className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 disabled:opacity-60">
-                      Cancel
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <div className="mb-2 flex flex-wrap gap-2 text-xs text-slate-400">
-                        <span className="rounded-full bg-slate-800 px-2 py-1 capitalize">{sourceTypeLabels[note.sourceType]}</span>
-                        {note.symbol ? <span className="rounded-full bg-slate-800 px-2 py-1">{note.symbol}</span> : null}
-                        <span className="rounded-full bg-slate-800 px-2 py-1 capitalize">Thesis: {formatEnum(note.thesisImpact)}</span>
-                        <span className="rounded-full bg-slate-800 px-2 py-1 capitalize">Risk: {formatEnum(note.riskImpact)}</span>
-                      </div>
-                      <h3 className="text-base font-semibold text-white">{note.title}</h3>
-                    </div>
-                    <button onClick={() => startEditing(note)} className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:border-slate-500">
-                      Edit
-                    </button>
-                  </div>
-                  {note.sourceUrl ? (
-                    <a href={note.sourceUrl} target="_blank" rel="noreferrer" className="mt-3 inline-block break-all text-sm text-sky-400 hover:text-sky-300">
-                      {note.sourceUrl}
-                    </a>
-                  ) : null}
-                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-300">{note.summary}</p>
-                  {note.tags.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {note.tags.map((tag) => (
-                        <span key={tag} className="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-300">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </>
-              )}
-            </article>
-          ))}
+          {notes.map((note) =>
+            editingId === note.id ? (
+              <article key={note.id} className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                <ResearchNoteForm form={editForm} holdings={holdings} setForm={setEditForm} />
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button disabled={saving} onClick={() => handleSaveEdit(note.id)} className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-60">
+                    {saving ? "Saving…" : "Save"}
+                  </button>
+                  <button disabled={saving} onClick={() => setEditingId(null)} className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 disabled:opacity-60">
+                    Cancel
+                  </button>
+                </div>
+              </article>
+            ) : (
+              <ResearchNoteItem key={note.id} note={note} sourceTypeLabels={sourceTypeLabels} onEdit={() => startEditing(note)} />
+            )
+          )}
         </div>
       ) : null}
     </section>

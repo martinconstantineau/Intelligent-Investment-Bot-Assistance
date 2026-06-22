@@ -23,7 +23,7 @@ export type ResearchNote = {
 export type ResearchNoteCreateInput = Omit<ResearchNote, "id" | "userId" | "createdAt" | "updatedAt">;
 export type ResearchNoteUpdateInput = Partial<ResearchNoteCreateInput>;
 
-type ResearchNoteRow = {
+export type ResearchNoteRow = {
   id: string;
   user_id: string;
   holding_id: string | null;
@@ -39,7 +39,7 @@ type ResearchNoteRow = {
   updated_at: string;
 };
 
-function fromRow(row: ResearchNoteRow): ResearchNote {
+export function fromRow(row: ResearchNoteRow): ResearchNote {
   return {
     id: row.id,
     userId: row.user_id,
