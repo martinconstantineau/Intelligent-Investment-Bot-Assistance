@@ -4,7 +4,7 @@ An early-stage portfolio research assistant for monitoring holdings, tracking th
 
 ## Purpose
 
-This project is being scaled back to a small Firebase-backed MVP. The first goal is to make the app deployable, authenticated, and persistent before adding advanced reporting or external API integrations.
+This project is now a small Supabase + Vercel MVP. The first goal is to keep the app deployable, authenticated, persistent, and easy to operate before adding advanced reporting or external API integrations.
 
 ## Important disclaimer
 
@@ -18,13 +18,13 @@ Core stack:
 - React
 - TypeScript
 - Tailwind CSS
-- Firebase App Hosting
-- Firebase Authentication
-- Cloud Firestore
-- Cloud Functions for Firebase
-- Firestore Security Rules
+- Vercel hosting
+- Supabase Auth
+- Supabase Postgres
+- Supabase Row Level Security
+- Supabase Realtime-ready client subscriptions
 
-External market-data and AI providers are deferred until the Firebase foundation is working end-to-end.
+External market-data and AI providers are deferred until the Supabase foundation is working end-to-end.
 
 ## Canonical starting portfolio
 
@@ -41,28 +41,23 @@ The initial research list is:
 
 The seed data intentionally leaves quantities, cost details, purchase dates, and allocation percentages blank. Do not invent missing portfolio values.
 
-## Firebase data model
+## Supabase data model
 
-Use user-scoped documents and subcollections:
+User-scoped tables:
 
 ```text
-users/{userId}
-users/{userId}/holdings/{holdingId}
-users/{userId}/watchlist/{watchlistId}
-users/{userId}/theses/{thesisId}
-users/{userId}/researchNotes/{noteId}
-users/{userId}/reports/{reportId}
-users/{userId}/decisionJournal/{entryId}
+public.holdings
+public.research_notes
+public.decision_journal_entries
+public.thesis_reviews
 ```
 
-Firebase configuration files:
+Each table includes a `user_id` column tied to `auth.users(id)`. Row Level Security is enabled so authenticated users can only read or modify their own rows.
+
+Schema migration:
 
 ```text
-firebase.json
-firestore.rules
-firestore.indexes.json
-apphosting.yaml
-functions/src/index.ts
+supabase/migrations/20260622000000_create_investment_workspace.sql
 ```
 
 ## Local setup
@@ -71,6 +66,13 @@ Install dependencies:
 
 ```bash
 npm install
+```
+
+Copy `.env.example` to `.env.local` and fill in the Supabase values:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ```
 
 Run the development server:
@@ -85,44 +87,35 @@ Open:
 http://localhost:3000
 ```
 
-## Environment variables
+## Supabase setup
 
-Copy `.env.example` to `.env.local` and fill in the Firebase values.
+1. Create a Supabase project.
+2. Enable Google provider under Authentication > Providers.
+3. Add your local and production URLs to Authentication > URL Configuration.
+4. Apply the SQL migration in `supabase/migrations/20260622000000_create_investment_workspace.sql`.
+5. Confirm RLS is enabled on all four public tables.
+6. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` locally and in Vercel.
 
-Required for the client app:
+## Vercel setup
 
-```text
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-```
-
-## Firebase console steps
-
-1. Create a Firebase project.
-2. Enable billing if Firebase App Hosting or scheduled functions require it.
-3. Set a budget alert.
-4. Enable Firebase Authentication.
-5. Enable Cloud Firestore.
-6. Deploy or paste the Firestore rules from `firestore.rules`.
-7. Connect the GitHub repository to Firebase App Hosting.
-8. Add Firebase public environment variables to App Hosting.
-9. Keep external market-data and AI API keys disabled until the MVP is stable.
+1. Import the GitHub repository into Vercel.
+2. Keep the framework preset as Next.js.
+3. Add the Supabase public environment variables in Project Settings > Environment Variables.
+4. Deploy from `main`.
+5. Add the deployed Vercel URL to Supabase Auth redirect URLs.
 
 ## First MVP boundary
 
 Included:
 
 - Canonical holdings list
-- Firebase SDK setup
-- Firebase Admin setup
-- Firestore security rules
-- Firebase App Hosting configuration
-- Placeholder scheduled function
-- Empty states for theses, reports, and allocation data
+- Supabase Auth setup
+- Supabase Postgres schema
+- Row Level Security policies
+- User-specific holdings, notes, journal entries, and thesis reviews
+- Manual portfolio review report
+- Workspace search and export
+- Data quality summary
 
 Excluded for now:
 
