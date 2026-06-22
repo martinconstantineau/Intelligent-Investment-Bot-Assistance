@@ -1,4 +1,12 @@
-import type { Holding } from "@/lib/mock-data";
+type Holding = {
+  symbol: string;
+  name: string;
+  assetType: string;
+  quantity: number;
+  averageCost: number;
+  currentPrice: number;
+  allocation: number;
+};
 
 type DbPortfolioTableProps = {
   items: Holding[];
