@@ -22,7 +22,7 @@ import {
   updateHolding,
   type HoldingCreateInput,
   type HoldingUpdateInput
-} from "@/lib/firebase/client-holdings";
+} from "@/lib/supabase/holdings";
 import {
   createDecisionJournalEntry,
   listenToDecisionJournalEntries,
@@ -30,7 +30,7 @@ import {
   type DecisionJournalCreateInput,
   type DecisionJournalEntry,
   type DecisionJournalUpdateInput
-} from "@/lib/firebase/decision-journal";
+} from "@/lib/supabase/decision-journal";
 import {
   createResearchNote,
   listenToResearchNotes,
@@ -38,7 +38,7 @@ import {
   type ResearchNote,
   type ResearchNoteCreateInput,
   type ResearchNoteUpdateInput
-} from "@/lib/firebase/research-notes";
+} from "@/lib/supabase/research-notes";
 import {
   createThesisReview,
   listenToThesisReviews,
@@ -46,7 +46,7 @@ import {
   type ThesisReview,
   type ThesisReviewCreateInput,
   type ThesisReviewUpdateInput
-} from "@/lib/firebase/thesis-reviews";
+} from "@/lib/supabase/thesis-reviews";
 import { portfolioDisclaimer, type Holding } from "@/lib/portfolio";
 
 export function Dashboard() {
@@ -96,7 +96,7 @@ export function Dashboard() {
       }
     }
 
-    initializeAndSubscribe(user.uid);
+    initializeAndSubscribe(user.id);
 
     return () => {
       cancelled = true;
@@ -111,7 +111,7 @@ export function Dashboard() {
     setJournalError(null);
 
     const unsubscribe = listenToDecisionJournalEntries(
-      user.uid,
+      user.id,
       (nextEntries) => {
         setJournalEntries(nextEntries);
         setLoadingJournalEntries(false);
@@ -132,7 +132,7 @@ export function Dashboard() {
     setResearchNotesError(null);
 
     const unsubscribe = listenToResearchNotes(
-      user.uid,
+      user.id,
       (nextNotes) => {
         setResearchNotes(nextNotes);
         setLoadingResearchNotes(false);
@@ -153,7 +153,7 @@ export function Dashboard() {
     setThesisReviewsError(null);
 
     const unsubscribe = listenToThesisReviews(
-      user.uid,
+      user.id,
       (nextReviews) => {
         setThesisReviews(nextReviews);
         setLoadingThesisReviews(false);
@@ -169,49 +169,49 @@ export function Dashboard() {
 
   if (!user) return null;
 
-  const displayName = user.displayName || user.email || "Signed-in user";
+  const displayName = (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) || (typeof user.user_metadata?.name === "string" && user.user_metadata.name) || user.email || "Signed-in user";
 
   async function handleCreateHolding(input: HoldingCreateInput) {
-    await createHolding(user.uid, input);
+    await createHolding(user.id, input);
   }
 
   async function handleUpdateHolding(holdingId: string, updates: HoldingUpdateInput) {
-    await updateHolding(user.uid, holdingId, updates);
+    await updateHolding(user.id, holdingId, updates);
   }
 
   async function handleCreateJournalEntry(input: DecisionJournalCreateInput) {
-    await createDecisionJournalEntry(user.uid, input);
+    await createDecisionJournalEntry(user.id, input);
   }
 
   async function handleUpdateJournalEntry(entryId: string, updates: DecisionJournalUpdateInput) {
-    await updateDecisionJournalEntry(user.uid, entryId, updates);
+    await updateDecisionJournalEntry(user.id, entryId, updates);
   }
 
   async function handleCreateResearchNote(input: ResearchNoteCreateInput) {
-    await createResearchNote(user.uid, input);
+    await createResearchNote(user.id, input);
   }
 
   async function handleUpdateResearchNote(noteId: string, updates: ResearchNoteUpdateInput) {
-    await updateResearchNote(user.uid, noteId, updates);
+    await updateResearchNote(user.id, noteId, updates);
   }
 
   async function handleCreateThesisReview(input: ThesisReviewCreateInput) {
-    await createThesisReview(user.uid, input);
+    await createThesisReview(user.id, input);
   }
 
   async function handleUpdateThesisReview(reviewId: string, updates: ThesisReviewUpdateInput) {
-    await updateThesisReview(user.uid, reviewId, updates);
+    await updateThesisReview(user.id, reviewId, updates);
   }
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-6 overflow-hidden sm:overflow-visible">
         <header className="rounded-3xl border border-slate-800 bg-gradient-to-br from-slate-900 to-slate-950 p-6 shadow-sm">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-sky-400">Firebase-first investment intelligence</p>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-sky-400">Supabase + Vercel investment intelligence</p>
           <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">Intelligent Investment Bot Assistance</h1>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">Minimal Firebase MVP for portfolio monitoring, thesis tracking, research notes, and decision journaling.</p>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">Supabase-backed MVP for portfolio monitoring, thesis tracking, research notes, and decision journaling.</p>
               <p className="mt-3 text-sm text-slate-300">Signed in as {displayName}</p>
             </div>
             <div className="space-y-3 lg:max-w-md">
@@ -224,10 +224,10 @@ export function Dashboard() {
         </header>
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Tracked Holdings" value={loadingHoldings ? "…" : String(holdings.length)} detail="User-specific Firestore holdings" />
-          <StatCard label="Research Notes" value={loadingResearchNotes ? "…" : String(researchNotes.length)} detail="Evidence and source capture" />
-          <StatCard label="Thesis Reviews" value={loadingThesisReviews ? "…" : String(thesisReviews.length)} detail="Manual review workflow" />
-          <StatCard label="Journal Entries" value={loadingJournalEntries ? "…" : String(journalEntries.length)} detail="Decision history records" />
+          <StatCard label="Tracked Holdings" value={loadingHoldings ? "..." : String(holdings.length)} detail="User-specific Supabase holdings" />
+          <StatCard label="Research Notes" value={loadingResearchNotes ? "..." : String(researchNotes.length)} detail="Evidence and source capture" />
+          <StatCard label="Thesis Reviews" value={loadingThesisReviews ? "..." : String(thesisReviews.length)} detail="Manual review workflow" />
+          <StatCard label="Journal Entries" value={loadingJournalEntries ? "..." : String(journalEntries.length)} detail="Decision history records" />
         </section>
 
         <PortfolioReviewSummary holdings={holdings} researchNotes={researchNotes} journalEntries={journalEntries} thesisReviews={thesisReviews} />
