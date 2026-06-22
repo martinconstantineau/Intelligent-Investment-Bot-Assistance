@@ -172,34 +172,42 @@ export function Dashboard() {
   const displayName = (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) || (typeof user.user_metadata?.name === "string" && user.user_metadata.name) || user.email || "Signed-in user";
 
   async function handleCreateHolding(input: HoldingCreateInput) {
+    if (!user) return;
     await createHolding(user.id, input);
   }
 
   async function handleUpdateHolding(holdingId: string, updates: HoldingUpdateInput) {
+    if (!user) return;
     await updateHolding(user.id, holdingId, updates);
   }
 
   async function handleCreateJournalEntry(input: DecisionJournalCreateInput) {
+    if (!user) return;
     await createDecisionJournalEntry(user.id, input);
   }
 
   async function handleUpdateJournalEntry(entryId: string, updates: DecisionJournalUpdateInput) {
+    if (!user) return;
     await updateDecisionJournalEntry(user.id, entryId, updates);
   }
 
   async function handleCreateResearchNote(input: ResearchNoteCreateInput) {
+    if (!user) return;
     await createResearchNote(user.id, input);
   }
 
   async function handleUpdateResearchNote(noteId: string, updates: ResearchNoteUpdateInput) {
+    if (!user) return;
     await updateResearchNote(user.id, noteId, updates);
   }
 
   async function handleCreateThesisReview(input: ThesisReviewCreateInput) {
+    if (!user) return;
     await createThesisReview(user.id, input);
   }
 
   async function handleUpdateThesisReview(reviewId: string, updates: ThesisReviewUpdateInput) {
+    if (!user) return;
     await updateThesisReview(user.id, reviewId, updates);
   }
 

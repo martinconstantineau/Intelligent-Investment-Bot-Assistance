@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { holdings, reports, theses } from "@/lib/mock-data";
+import { reports, theses } from "@/lib/mock-data";
 
 function createServerClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -20,7 +20,7 @@ export async function getDashboardHoldings() {
   const client = createServerClient();
 
   if (!client) {
-    return holdings;
+    return [];
   }
 
   const { data, error } = await client
@@ -29,7 +29,7 @@ export async function getDashboardHoldings() {
     .order("symbol", { ascending: true });
 
   if (error || !data) {
-    return holdings;
+    return [];
   }
 
   return data.map((item, index) => ({
