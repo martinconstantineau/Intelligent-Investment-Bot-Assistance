@@ -4,7 +4,7 @@ import { createClient } from "./client";
 export type HoldingCreateInput = Omit<Holding, "id" | "userId" | "createdAt" | "updatedAt">;
 export type HoldingUpdateInput = Partial<Omit<Holding, "id" | "userId" | "createdAt" | "updatedAt">>;
 
-type HoldingRow = {
+export type HoldingRow = {
   id: string;
   user_id: string;
   canonical_key: string | null;
@@ -22,7 +22,7 @@ type HoldingRow = {
   updated_at: string;
 };
 
-function fromRow(row: HoldingRow): Holding {
+export function fromRow(row: HoldingRow): Holding {
   return {
     id: row.id,
     userId: row.user_id,

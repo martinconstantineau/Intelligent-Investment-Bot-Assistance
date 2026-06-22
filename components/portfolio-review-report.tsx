@@ -1,9 +1,11 @@
 "use client";
 
-import type { DecisionJournalEntry } from "@/lib/firebase/decision-journal";
-import type { ResearchNote } from "@/lib/firebase/research-notes";
-import type { ThesisReview } from "@/lib/firebase/thesis-reviews";
+import { useMemo } from "react";
+import type { DecisionJournalEntry } from "@/lib/supabase/decision-journal";
+import type { ResearchNote } from "@/lib/supabase/research-notes";
+import type { ThesisReview } from "@/lib/supabase/thesis-reviews";
 import type { Holding } from "@/lib/portfolio";
+import { formatDateTime, formatEnum } from "@/lib/formatters";
 
 type PortfolioReviewReportProps = {
   holdings: Holding[];
@@ -39,31 +41,31 @@ function needsReviewReason(holding: Holding) {
   return reasons.join("; ");
 }
 
-function getHoldingsNeedingReview(holdings: Holding[]): ReviewItem[] {
-  return holdings.filter(needsReview).map((holding) => ({ symbol: holding.symbol, reason: needsReviewReason(holding) }));
-}
-
-function getLatestThesisReview(holding: Holding, thesisReviews: ThesisReview[]) {
-  return thesisReviews.find((review) => isRelatedToHolding(review, holding)) ?? null;
-}
-
-function formatEnum(value: string | null | undefined) {
-  return value ? value.replace(/_/g, " ") : "Not set";
-}
-
 function printReport() {
   window.print();
 }
 
 export function PortfolioReviewReport({ holdings, researchNotes, journalEntries, thesisReviews }: PortfolioReviewReportProps) {
-  const generatedAt = new Intl.DateTimeFormat("en-CA", {
-    dateStyle: "long",
-    timeStyle: "short"
-  }).format(new Date());
+  /**
+   * Fixes Issue #2: Inefficient Filtering
+   * Memoize calculated values to prevent unnecessary recalculations
+   */
+  const holdingsNeedingReview = useMemo(() => {
+    return holdings.filter(needsReview).map((holding) => ({ symbol: holding.symbol, reason: needsReviewReason(holding) }));
+  }, [holdings]);
 
-  const holdingsNeedingReview = getHoldingsNeedingReview(holdings);
-  const recentResearchNotes = researchNotes.slice(0, 5);
-  const recentJournalEntries = journalEntries.slice(0, 5);
+  const recentResearchNotes = useMemo(() => researchNotes.slice(0, 5), [researchNotes]);
+  const recentJournalEntries = useMemo(() => journalEntries.slice(0, 5), [journalEntries]);
+
+  const thesisReviewsMap = useMemo(() => {
+    const map = new Map<string, ThesisReview>();
+    for (const review of thesisReviews) {
+      map.set(review.holdingId, review);
+    }
+    return map;
+  }, [thesisReviews]);
+
+  const generatedAt = formatDateTime(new Date());
 
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 print:border-slate-300 print:bg-white print:text-black">
@@ -115,7 +117,7 @@ export function PortfolioReviewReport({ holdings, researchNotes, journalEntries,
           <h3 className="text-base font-semibold text-white print:text-black">Latest Thesis Review Per Holding</h3>
           <ul className="mt-3 space-y-2">
             {holdings.map((holding) => {
-              const review = getLatestThesisReview(holding, thesisReviews);
+              const review = thesisReviewsMap.get(holding.id);
 
               return (
                 <li key={holding.id} className="rounded-lg border border-slate-800 bg-slate-900/70 p-3 print:border-slate-300 print:bg-white">

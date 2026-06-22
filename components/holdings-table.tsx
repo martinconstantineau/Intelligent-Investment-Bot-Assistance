@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { AssetType, Holding, RiskLevel, TimeHorizon, WatchStatus } from "@/lib/portfolio";
-import type { HoldingCreateInput, HoldingUpdateInput } from "@/lib/firebase/client-holdings";
+import type { HoldingCreateInput, HoldingUpdateInput } from "@/lib/supabase/holdings";
+import { HoldingsRow } from "@/components/holdings-row";
+import { formatCurrency, formatNumber } from "@/lib/formatters";
 
 type HoldingsTableProps = {
   holdings: Holding[];
@@ -99,24 +101,6 @@ function normalizeForm(form: HoldingFormState): HoldingCreateInput {
   };
 }
 
-function formatNumber(value: number | null) {
-  return value === null ? "Not entered" : value.toLocaleString("en-CA");
-}
-
-function formatCurrency(value: number | null) {
-  return value === null
-    ? "Not entered"
-    : new Intl.NumberFormat("en-CA", {
-        style: "currency",
-        currency: "CAD",
-        maximumFractionDigits: 2
-      }).format(value);
-}
-
-function formatEnum(value: string | null) {
-  return value ? value.replace(/_/g, " ") : "Not set";
-}
-
 function FieldLabel({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="space-y-1 text-xs text-slate-400">
@@ -182,12 +166,7 @@ function HoldingForm({ form, setForm }: { form: HoldingFormState; setForm: (next
       </FieldLabel>
       <label className="space-y-1 text-xs text-slate-400 md:col-span-2 xl:col-span-3">
         <span>Thesis</span>
-        <textarea
-          className={`${inputClassName()} min-h-24 resize-y`}
-          value={form.thesis}
-          onChange={(event) => setForm({ ...form, thesis: event.target.value })}
-          placeholder="Optional thesis notes"
-        />
+        <textarea className={`${inputClassName()} min-h-24 resize-y`} value={form.thesis} onChange={(event) => setForm({ ...form, thesis: event.target.value })} placeholder="Optional thesis notes" />
       </label>
     </div>
   );
@@ -200,6 +179,18 @@ export function HoldingsTable({ holdings, loading, error, onCreateHolding, onUpd
   const [editForm, setEditForm] = useState<HoldingFormState>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  /**
+   * Fixes Issue #6: O(n) Search on Every Holdings Selection
+   * Create holdings map for O(1) lookup
+   */
+  const holdingsMap = useMemo(() => {
+    const map = new Map<string, Holding>();
+    for (const h of holdings) {
+      map.set(h.id, h);
+    }
+    return map;
+  }, [holdings]);
 
   async function handleCreate() {
     try {
@@ -241,7 +232,7 @@ export function HoldingsTable({ holdings, loading, error, onCreateHolding, onUpd
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold text-white">Holdings</h2>
-          <p className="text-sm text-slate-400">User-specific Firestore holdings. Position details remain blank until entered.</p>
+          <p className="text-sm text-slate-400">User-specific Supabase holdings. Position details remain blank until entered.</p>
         </div>
         <button
           onClick={() => {
@@ -278,7 +269,7 @@ export function HoldingsTable({ holdings, loading, error, onCreateHolding, onUpd
 
       {!loading && !error && holdings.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-700 bg-slate-950/60 p-4 text-sm text-slate-400">
-          No holdings found. The app will initialize your canonical research list after sign-in when Firestore is available.
+          No holdings found. The app will initialize your canonical research list after sign-in when Supabase is available.
         </div>
       ) : null}
 
@@ -301,9 +292,9 @@ export function HoldingsTable({ holdings, loading, error, onCreateHolding, onUpd
             </thead>
             <tbody className="divide-y divide-slate-800">
               {holdings.map((holding) => (
-                <tr key={holding.id} className="align-top text-slate-200">
+                <HoldingsRow key={holding.id} holding={holding} isEditing={editingId === holding.id} onEdit={() => startEditing(holding)}>
                   {editingId === holding.id ? (
-                    <td colSpan={10} className="py-4">
+                    <>
                       <HoldingForm form={editForm} setForm={setEditForm} />
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button disabled={saving} onClick={() => handleSaveEdit(holding.id)} className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-60">
@@ -313,26 +304,9 @@ export function HoldingsTable({ holdings, loading, error, onCreateHolding, onUpd
                           Cancel
                         </button>
                       </div>
-                    </td>
-                  ) : (
-                    <>
-                      <td className="py-3 font-semibold text-white">{holding.symbol}</td>
-                      <td className="py-3">{holding.name}</td>
-                      <td className="py-3 capitalize">{holding.assetType}</td>
-                      <td className="py-3 text-slate-400">{formatNumber(holding.quantity)}</td>
-                      <td className="py-3 text-slate-400">{formatCurrency(holding.costBasis)}</td>
-                      <td className="py-3 text-slate-400">{holding.purchaseDate ?? "Not entered"}</td>
-                      <td className="py-3 capitalize text-slate-400">{formatEnum(holding.riskLevel)}</td>
-                      <td className="py-3 capitalize text-slate-400">{formatEnum(holding.timeHorizon)}</td>
-                      <td className="py-3 capitalize text-slate-400">{formatEnum(holding.watchStatus)}</td>
-                      <td className="py-3">
-                        <button onClick={() => startEditing(holding)} className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:border-slate-500">
-                          Edit
-                        </button>
-                      </td>
                     </>
-                  )}
-                </tr>
+                  ) : null}
+                </HoldingsRow>
               ))}
             </tbody>
           </table>

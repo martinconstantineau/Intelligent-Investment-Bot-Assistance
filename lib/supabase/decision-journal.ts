@@ -30,7 +30,7 @@ export type DecisionJournalEntry = {
 export type DecisionJournalCreateInput = Omit<DecisionJournalEntry, "id" | "userId" | "createdAt" | "updatedAt">;
 export type DecisionJournalUpdateInput = Partial<DecisionJournalCreateInput>;
 
-type DecisionJournalRow = {
+export type DecisionJournalRow = {
   id: string;
   user_id: string;
   holding_id: string | null;
@@ -46,7 +46,7 @@ type DecisionJournalRow = {
   updated_at: string;
 };
 
-function fromRow(row: DecisionJournalRow): DecisionJournalEntry {
+export function fromRow(row: DecisionJournalRow): DecisionJournalEntry {
   return {
     id: row.id,
     userId: row.user_id,
