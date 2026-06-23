@@ -4,9 +4,9 @@
   "/api/portfolio/route": "/api/portfolio",
   "/decisions/page": "/decisions",
   "/reports/page": "/reports",
-  "/settings/page": "/settings",
   "/research/page": "/research",
   "/watchlist/page": "/watchlist",
+  "/settings/page": "/settings",
   "/portfolio/page": "/portfolio",
   "/page": "/",
   "/live/page": "/live"
