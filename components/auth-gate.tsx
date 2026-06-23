@@ -7,7 +7,7 @@ import { createClient, getSupabaseConfigurationErrorMessage, isSupabaseConfigure
 type AuthContextValue = {
   user: User | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string) => Promise<void>;
   signOutUser: () => Promise<void>;
 };
 
@@ -28,6 +28,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(supabaseConfigured);
   const [error, setError] = useState<string | null>(() => (supabaseConfigured ? null : getSupabaseConfigurationErrorMessage()));
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const supabase = useMemo(() => (supabaseConfigured ? createClient() : null), [supabaseConfigured]);
 
   useEffect(() => {
@@ -60,7 +63,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
     () => ({
       user,
       loading,
-      signInWithGoogle: async () => {
+      signInWithEmail: async (emailAddress: string) => {
         if (!supabase) {
           const configurationError = new Error(getSupabaseConfigurationErrorMessage());
           setError(configurationError.message);
@@ -68,11 +71,10 @@ export function AuthGate({ children }: { children: ReactNode }) {
         }
 
         setError(null);
-        const { error: signInError } = await supabase.auth.signInWithOAuth({
-          provider: "google",
+        const { error: signInError } = await supabase.auth.signInWithOtp({
+          email: emailAddress,
           options: {
-            redirectTo: window.location.origin,
-            queryParams: { prompt: "select_account" }
+            emailRedirectTo: window.location.origin
           }
         });
 
@@ -108,21 +110,48 @@ export function AuthGate({ children }: { children: ReactNode }) {
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">Sign in to continue</h1>
           <p className="mt-3 text-sm leading-6 text-slate-400">
             {supabase
-              ? "Access your private portfolio research workspace. Records are stored under your authenticated Supabase user account."
+              ? "Access your private portfolio research workspace. Enter your email and we'll send you a secure sign-in link."
               : "Supabase environment variables are missing. Set NEXT_PUBLIC_SUPABASE_URL and either NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY to enable authentication."}
           </p>
           {error ? <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-100">{error}</p> : null}
-          <button
-            onClick={() => {
-              value.signInWithGoogle().catch((signInError) => {
-                setError(signInError instanceof Error ? signInError.message : "Unable to sign in with Google.");
-              });
-            }}
-            disabled={!supabase}
-            className="mt-6 w-full rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
-          >
-            {supabase ? "Sign in with Google" : "Supabase configuration required"}
-          </button>
+          {magicLinkSent ? (
+            <div className="mt-4 rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 text-sm text-sky-100">
+              Magic link sent! Check your email to sign in.
+            </div>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!email.trim()) return;
+                setSubmitting(true);
+                setError(null);
+                value.signInWithEmail(email.trim())
+                  .then(() => setMagicLinkSent(true))
+                  .catch((signInError) => {
+                    setError(signInError instanceof Error ? signInError.message : "Unable to send magic link.");
+                  })
+                  .finally(() => setSubmitting(false));
+              }}
+              className="mt-6 space-y-3"
+            >
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                disabled={!supabase}
+                className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 outline-none focus:border-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={!supabase || submitting}
+                className="w-full rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
+              >
+                {!supabase ? "Supabase configuration required" : submitting ? "Sending..." : "Send magic link"}
+              </button>
+            </form>
+          )}
           <p className="mt-4 text-xs leading-5 text-slate-500">
             Informational and research use only. No brokerage connection, trading execution, or financial advice.
           </p>
