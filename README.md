@@ -75,6 +75,11 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 ```
 
+The key variable accepts either name — use whichever your Supabase project or existing `.env` file uses:
+
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — matches the label shown in the Supabase dashboard
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — matches the official Supabase Next.js SSR template
+
 Run the development server:
 
 ```bash
@@ -94,7 +99,7 @@ http://localhost:3000
 3. Add your local and production URLs to Authentication > URL Configuration.
 4. Apply the SQL migration in `supabase/migrations/20260622000000_create_investment_workspace.sql`.
 5. Confirm RLS is enabled on all four public tables.
-6. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` locally and in Vercel.
+6. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`) locally and in Vercel.
 
 ## Vercel setup
 

@@ -109,7 +109,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
           <p className="mt-3 text-sm leading-6 text-slate-400">
             {supabase
               ? "Access your private portfolio research workspace. Records are stored under your authenticated Supabase user account."
-              : "Supabase environment variables are missing, so authentication is unavailable until NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are configured."}
+              : "Supabase environment variables are missing. Set NEXT_PUBLIC_SUPABASE_URL and either NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY to enable authentication."}
           </p>
           {error ? <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-100">{error}</p> : null}
           <button
