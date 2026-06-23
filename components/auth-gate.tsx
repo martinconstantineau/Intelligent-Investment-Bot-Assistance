@@ -2,7 +2,7 @@
 
 import type { User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, getSupabaseConfigurationErrorMessage, isSupabaseConfigured } from "@/lib/supabase/client";
 
 type AuthContextValue = {
   user: User | null;
@@ -24,12 +24,18 @@ export function useAuth() {
 }
 
 export function AuthGate({ children }: { children: ReactNode }) {
+  const supabaseConfigured = isSupabaseConfigured();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const supabase = useMemo(() => createClient(), []);
+  const [loading, setLoading] = useState(supabaseConfigured);
+  const [error, setError] = useState<string | null>(() => (supabaseConfigured ? null : getSupabaseConfigurationErrorMessage()));
+  const supabase = useMemo(() => (supabaseConfigured ? createClient() : null), [supabaseConfigured]);
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
 
     supabase.auth.getUser().then(({ data, error: userError }) => {
@@ -55,6 +61,12 @@ export function AuthGate({ children }: { children: ReactNode }) {
       user,
       loading,
       signInWithGoogle: async () => {
+        if (!supabase) {
+          const configurationError = new Error(getSupabaseConfigurationErrorMessage());
+          setError(configurationError.message);
+          throw configurationError;
+        }
+
         setError(null);
         const { error: signInError } = await supabase.auth.signInWithOAuth({
           provider: "google",
@@ -67,6 +79,10 @@ export function AuthGate({ children }: { children: ReactNode }) {
         if (signInError) throw signInError;
       },
       signOutUser: async () => {
+        if (!supabase) {
+          return;
+        }
+
         setError(null);
         const { error: signOutError } = await supabase.auth.signOut();
 
@@ -91,7 +107,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-sky-400">Investment intelligence</p>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white">Sign in to continue</h1>
           <p className="mt-3 text-sm leading-6 text-slate-400">
-            Access your private portfolio research workspace. Records are stored under your authenticated Supabase user account.
+            {supabase
+              ? "Access your private portfolio research workspace. Records are stored under your authenticated Supabase user account."
+              : "Supabase environment variables are missing, so authentication is unavailable until NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are configured."}
           </p>
           {error ? <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-100">{error}</p> : null}
           <button
@@ -100,9 +118,10 @@ export function AuthGate({ children }: { children: ReactNode }) {
                 setError(signInError instanceof Error ? signInError.message : "Unable to sign in with Google.");
               });
             }}
-            className="mt-6 w-full rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+            disabled={!supabase}
+            className="mt-6 w-full rounded-xl bg-sky-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
           >
-            Sign in with Google
+            {supabase ? "Sign in with Google" : "Supabase configuration required"}
           </button>
           <p className="mt-4 text-xs leading-5 text-slate-500">
             Informational and research use only. No brokerage connection, trading execution, or financial advice.
