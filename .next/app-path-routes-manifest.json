@@ -3,11 +3,11 @@
   "/api/health/route": "/api/health",
   "/api/portfolio/route": "/api/portfolio",
   "/decisions/page": "/decisions",
+  "/reports/page": "/reports",
   "/research/page": "/research",
   "/settings/page": "/settings",
-  "/reports/page": "/reports",
   "/watchlist/page": "/watchlist",
-  "/page": "/",
   "/portfolio/page": "/portfolio",
+  "/page": "/",
   "/live/page": "/live"
 }
