@@ -16,8 +16,8 @@ export type ResearchNote = {
   thesisImpact: ThesisImpact | null;
   riskImpact: RiskImpact | null;
   tags: string[];
-  createdAt?: unknown;
-  updatedAt?: unknown;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type ResearchNoteCreateInput = Omit<ResearchNote, "id" | "userId" | "createdAt" | "updatedAt">;
@@ -119,7 +119,7 @@ export function listenToResearchNotes(userId: string, onChange: (notes: Research
     }
   }
 
-  refresh();
+  void refresh();
 
   const channel = supabase
     .channel(`research-notes:${userId}`)

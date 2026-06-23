@@ -32,6 +32,9 @@ export async function getDashboardHoldings() {
     return [];
   }
 
+  const positionValues = data.map((item) => Number(item.quantity ?? 0) * Number(item.average_cost ?? 0));
+  const totalValue = positionValues.reduce((sum, v) => sum + v, 0);
+
   return data.map((item, index) => ({
     symbol: item.symbol,
     name: item.name ?? item.symbol,
@@ -39,7 +42,7 @@ export async function getDashboardHoldings() {
     quantity: Number(item.quantity),
     averageCost: Number(item.average_cost),
     currentPrice: Number(item.average_cost),
-    allocation: [32, 28, 18, 12, 10][index] ?? 0
+    allocation: totalValue > 0 ? Math.round((positionValues[index] / totalValue) * 100) : 0
   }));
 }
 

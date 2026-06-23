@@ -119,7 +119,7 @@ export function listenToHoldings(userId: string, onChange: (holdings: Holding[])
     }
   }
 
-  refresh();
+  void refresh();
 
   const channel = supabase
     .channel(`holdings:${userId}`)

@@ -23,8 +23,8 @@ export type DecisionJournalEntry = {
   riskLevel: RiskLevel | null;
   thesisSnapshot: string | null;
   outcome: string | null;
-  createdAt?: unknown;
-  updatedAt?: unknown;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type DecisionJournalCreateInput = Omit<DecisionJournalEntry, "id" | "userId" | "createdAt" | "updatedAt">;
@@ -130,7 +130,7 @@ export function listenToDecisionJournalEntries(
     }
   }
 
-  refresh();
+  void refresh();
 
   const channel = supabase
     .channel(`decision-journal:${userId}`)

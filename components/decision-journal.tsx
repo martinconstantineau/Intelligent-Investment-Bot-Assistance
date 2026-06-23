@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Holding, RiskLevel } from "@/lib/portfolio";
-import type { DecisionJournalCreateInput, DecisionJournalEntry, DecisionJournalUpdateInput, DecisionType } from "@/lib/firebase/decision-journal";
+import type { DecisionJournalCreateInput, DecisionJournalEntry, DecisionJournalUpdateInput, DecisionType } from "@/lib/supabase/decision-journal";
 
 type DecisionJournalProps = {
   holdings: Holding[];

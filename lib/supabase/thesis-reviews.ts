@@ -15,8 +15,8 @@ export type ThesisReview = {
   watchItems: string;
   nextReviewDate: string | null;
   conviction: number | null;
-  createdAt?: unknown;
-  updatedAt?: unknown;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type ThesisReviewCreateInput = Omit<ThesisReview, "id" | "userId" | "createdAt" | "updatedAt">;
@@ -122,7 +122,7 @@ export function listenToThesisReviews(userId: string, onChange: (reviews: Thesis
     }
   }
 
-  refresh();
+  void refresh();
 
   const channel = supabase
     .channel(`thesis-reviews:${userId}`)
