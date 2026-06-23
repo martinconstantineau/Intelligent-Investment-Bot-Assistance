@@ -1,6 +1,6 @@
-import type { DecisionJournalEntry } from "@/lib/firebase/decision-journal";
-import type { ResearchNote } from "@/lib/firebase/research-notes";
-import type { ThesisReview } from "@/lib/firebase/thesis-reviews";
+import type { DecisionJournalEntry } from "@/lib/supabase/decision-journal";
+import type { ResearchNote } from "@/lib/supabase/research-notes";
+import type { ThesisReview } from "@/lib/supabase/thesis-reviews";
 import type { Holding } from "@/lib/portfolio";
 
 type PortfolioReviewSummaryProps = {

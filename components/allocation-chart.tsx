@@ -8,7 +8,7 @@ export function AllocationChart() {
       <div className="flex h-72 items-center justify-center rounded-2xl border border-dashed border-slate-700 bg-slate-950/60 p-6 text-center">
         <div>
           <p className="text-sm font-medium text-slate-200">No allocation data yet</p>
-          <p className="mt-2 max-w-xs text-sm text-slate-500">The Firebase MVP starts with a research list only. It should not invent portfolio weights, prices, or performance.</p>
+          <p className="mt-2 max-w-xs text-sm text-slate-500">Enter quantities and cost basis values in the Holdings table to see allocation weights.</p>
         </div>
       </div>
     </section>

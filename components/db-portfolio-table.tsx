@@ -21,12 +21,9 @@ const money = new Intl.NumberFormat("en-CA", {
 export function DbPortfolioTable({ items }: DbPortfolioTableProps) {
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-white">Top Holdings</h2>
-          <p className="text-sm text-slate-400">Database-backed holdings with mock fallback.</p>
-        </div>
-        <button className="rounded-lg bg-sky-500 px-3 py-2 text-sm font-medium text-slate-950">Add Holding</button>
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-white">Top Holdings</h2>
+        <p className="text-sm text-slate-400">Database-backed holdings with mock fallback.</p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] text-left text-sm">
