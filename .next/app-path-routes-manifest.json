@@ -1,11 +1,11 @@
 {
   "/_not-found/page": "/_not-found",
-  "/api/health/route": "/api/health",
   "/api/portfolio/route": "/api/portfolio",
+  "/api/health/route": "/api/health",
   "/decisions/page": "/decisions",
+  "/research/page": "/research",
   "/reports/page": "/reports",
   "/settings/page": "/settings",
-  "/research/page": "/research",
   "/watchlist/page": "/watchlist",
   "/portfolio/page": "/portfolio",
   "/page": "/",

@@ -15,13 +15,6 @@
       "static/css/6d1e4b716d0edfa9.css",
       "static/chunks/app/layout-8293510cfa4b5e35.js"
     ],
-    "/api/health/route": [
-      "static/chunks/webpack-4a462cecab786e93.js",
-      "static/chunks/4bd1b696-c023c6e3521b1417.js",
-      "static/chunks/255-98a0bdaa30757bda.js",
-      "static/chunks/main-app-6330074265df7517.js",
-      "static/chunks/app/api/health/route-564d8fa10b3e4edc.js"
-    ],
     "/api/portfolio/route": [
       "static/chunks/webpack-4a462cecab786e93.js",
       "static/chunks/4bd1b696-c023c6e3521b1417.js",
@@ -29,12 +22,26 @@
       "static/chunks/main-app-6330074265df7517.js",
       "static/chunks/app/api/portfolio/route-564d8fa10b3e4edc.js"
     ],
+    "/api/health/route": [
+      "static/chunks/webpack-4a462cecab786e93.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-98a0bdaa30757bda.js",
+      "static/chunks/main-app-6330074265df7517.js",
+      "static/chunks/app/api/health/route-564d8fa10b3e4edc.js"
+    ],
     "/decisions/page": [
       "static/chunks/webpack-4a462cecab786e93.js",
       "static/chunks/4bd1b696-c023c6e3521b1417.js",
       "static/chunks/255-98a0bdaa30757bda.js",
       "static/chunks/main-app-6330074265df7517.js",
       "static/chunks/app/decisions/page-564d8fa10b3e4edc.js"
+    ],
+    "/research/page": [
+      "static/chunks/webpack-4a462cecab786e93.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-98a0bdaa30757bda.js",
+      "static/chunks/main-app-6330074265df7517.js",
+      "static/chunks/app/research/page-564d8fa10b3e4edc.js"
     ],
     "/reports/page": [
       "static/chunks/webpack-4a462cecab786e93.js",
@@ -49,13 +56,6 @@
       "static/chunks/255-98a0bdaa30757bda.js",
       "static/chunks/main-app-6330074265df7517.js",
       "static/chunks/app/settings/page-564d8fa10b3e4edc.js"
-    ],
-    "/research/page": [
-      "static/chunks/webpack-4a462cecab786e93.js",
-      "static/chunks/4bd1b696-c023c6e3521b1417.js",
-      "static/chunks/255-98a0bdaa30757bda.js",
-      "static/chunks/main-app-6330074265df7517.js",
-      "static/chunks/app/research/page-564d8fa10b3e4edc.js"
     ],
     "/watchlist/page": [
       "static/chunks/webpack-4a462cecab786e93.js",
