@@ -5,8 +5,8 @@
   "/decisions/page": "/decisions",
   "/reports/page": "/reports",
   "/research/page": "/research",
-  "/watchlist/page": "/watchlist",
   "/settings/page": "/settings",
+  "/watchlist/page": "/watchlist",
   "/portfolio/page": "/portfolio",
   "/page": "/",
   "/live/page": "/live"

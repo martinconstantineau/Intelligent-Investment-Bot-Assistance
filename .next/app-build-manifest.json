@@ -50,19 +50,19 @@
       "static/chunks/main-app-6330074265df7517.js",
       "static/chunks/app/research/page-564d8fa10b3e4edc.js"
     ],
-    "/watchlist/page": [
-      "static/chunks/webpack-4a462cecab786e93.js",
-      "static/chunks/4bd1b696-c023c6e3521b1417.js",
-      "static/chunks/255-98a0bdaa30757bda.js",
-      "static/chunks/main-app-6330074265df7517.js",
-      "static/chunks/app/watchlist/page-564d8fa10b3e4edc.js"
-    ],
     "/settings/page": [
       "static/chunks/webpack-4a462cecab786e93.js",
       "static/chunks/4bd1b696-c023c6e3521b1417.js",
       "static/chunks/255-98a0bdaa30757bda.js",
       "static/chunks/main-app-6330074265df7517.js",
       "static/chunks/app/settings/page-564d8fa10b3e4edc.js"
+    ],
+    "/watchlist/page": [
+      "static/chunks/webpack-4a462cecab786e93.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-98a0bdaa30757bda.js",
+      "static/chunks/main-app-6330074265df7517.js",
+      "static/chunks/app/watchlist/page-564d8fa10b3e4edc.js"
     ],
     "/portfolio/page": [
       "static/chunks/webpack-4a462cecab786e93.js",
